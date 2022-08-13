@@ -343,7 +343,8 @@ def create_venue_submission():
                 facebook_link=form.facebook_link.data, 
                 seeking_description=form.seeking_description.data,
                 website=form.website_link.data, 
-                seeking_talent=form.seeking_talent.data)
+                seeking_talent=form.seeking_talent.data
+            )
             # commit session to database
             db.session.add(venue)
             db.session.commit()
