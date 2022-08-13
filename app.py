@@ -31,7 +31,7 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venue'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -54,7 +54,7 @@ class Venue(db.Model):
       return f"<Venue {self.id} name: {self.name}>"
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -75,8 +75,8 @@ class Show(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
@@ -146,7 +146,7 @@ def venues():
     # adding city/state to the  tuples
     locations.add((venue.city, venue.state))
 
-  # for each unique city / state, add veneus
+  # for each unique city / state, add venue
   for location in locations:
     data.append({
       "city": location[0],
@@ -173,7 +173,7 @@ def venues():
           "name": venue.name,
           "No_Of_upcoming_shows": NumUpcomingShows
         })
-  return render_template('pages/venues.html', areas=data);
+  return render_template('pages/venues.html', areas=data)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
@@ -565,7 +565,7 @@ def edit_artist(artist_id):
   # }
   artist = Artist.query.get(artist_id)
 
-  artist={
+  artist_data={
     "id": artist.id,
     "name": artist.name,
     "genres": artist.genres,
@@ -576,7 +576,7 @@ def edit_artist(artist_id):
     "image_link": artist.image_link
   }
   # TODO: populate form with fields from artist with ID <artist_id>
-  return render_template('forms/edit_artist.html', form=form, artist=artist)
+  return render_template('forms/edit_artist.html', form=form, artist=artist_data)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
@@ -585,7 +585,6 @@ def edit_artist_submission(artist_id):
   try:
     form = ArtistForm()
     artist = Artist.query.get(artist_id)
-    
     name = form.name.data
 
     artist.name = name
@@ -691,8 +690,8 @@ def create_artist_submission():
   try:
     form = ArtistForm()
     artist = Artist(name=form.name.data, city=form.city.data, state=form.state.data,
-                    phone=form.phone.data, genres=form.genres.data,
-                    image_link=form.image_link.data, facebook_link=form.facebook_link.data)
+                    phone=form.phone.data, genres=form.genres.data,image_link=form.image_link.data, 
+                    facebook_link=form.facebook_link.data)
     db.session.add(artist)
     db.session.commit()
     # on successful db insert, flash success
@@ -797,10 +796,10 @@ def create_show_submission():
   
   except:
     db.session.rollback()
-    flash('An error occured. show could not be listed')
+    flash('An error occurred. show could not be listed')
   finally:
     db.session.close()
-    
+
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
