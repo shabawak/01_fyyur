@@ -25,6 +25,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # TODO: connect to a local postgresql database
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:root@localhost:5432/fyyur'
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -327,31 +328,40 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-  try:
-    # getting  form data and using it to  create new venue
-    form = VenueForm()
-    venue = Venue(name=form.name.data, city=form.city.data, state=form.state.data, address=form.address.data,
-                  phone=form.phone.data, image_link=form.image_link.data, genres=form.genres.data,
-                  facebook_link=form.facebook_link.data, seeking_description=form.seeking_description.data,
-                  website=form.website.data, seeking_talent=form.seeking_talent.data)
-    # commit session to database
-    db.session.add(venue)
-    db.session.commit()
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  except:
-    # on unsuccessful db insert, flash error
-    db.session.rollback()
-    flash('An error occurred. Venue'+ request.form['name'] + ' could not be listed')
-  finally:
-    # closes session
-    db.session.close()
+  form = VenueForm(request.form)
+  if form.validate():
+        try:
+        # getting  form data and using it to  create new venue  
+            venue = Venue(
+                name=form.name.data, 
+                city=form.city.data, 
+                state=form.state.data, 
+                address=form.address.data,
+                phone=form.phone.data, 
+                image_link=form.image_link.data, 
+                genres=",".join(form.genres.data),
+                facebook_link=form.facebook_link.data, 
+                seeking_description=form.seeking_description.data,
+                website=form.website_link.data, 
+                seeking_talent=form.seeking_talent.data)
+            # commit session to database
+            db.session.add(venue)
+            db.session.commit()
+            # on successful db insert, flash success
+            flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        except:
+        # on unsuccessful db insert, flash error
+            db.session.rollback()
+            flash('An error occurred. Venue'+ request.form['name'] + ' could not be listed')
+        finally:
+        # closes session
+            db.session.close()  
 
-  # on successful db insert, flash success
-  #flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+        # on successful db insert, flash success
+        #flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        # TODO: on unsuccessful db insert, flash an error instead.
+        # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+        # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -362,6 +372,7 @@ def delete_venue(venue_id):
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
   #return None
+  
   try:
     # retrieving venue by id
     venue = Venue.query.get(venue_id)
@@ -690,7 +701,7 @@ def create_artist_submission():
   try:
     form = ArtistForm()
     artist = Artist(name=form.name.data, city=form.city.data, state=form.state.data,
-                    phone=form.phone.data, genres=form.genres.data,image_link=form.image_link.data, 
+                    phone=form.phone.data, genres = ",".join(form.genres.data),image_link=form.image_link.data, 
                     facebook_link=form.facebook_link.data)
     db.session.add(artist)
     db.session.commit()
